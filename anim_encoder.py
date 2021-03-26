@@ -34,6 +34,8 @@ import cv2
 import hashlib
 from numpy import *
 from time import time
+import imageio
+from shutil import copyfile
 
 # How long to wait before the animation restarts
 END_FRAME_PAUSE = 4000
@@ -158,7 +160,7 @@ def generate_animation(anim_name):
             continue
         last_sha256 = sha256
 
-        im = misc.imread(f)
+        im = imageio.imread(f)
         # Remove alpha channel from image
         if im.shape[2] == 4:
             im = im[:,:,:3]
@@ -222,7 +224,7 @@ def generate_animation(anim_name):
 
     packed = packed[0:allocator.num_used_rows]
 
-    misc.imsave(anim_name + "_packed_tmp.png", packed)
+    imageio.imsave(anim_name + "_packed_tmp.png", packed)
     # Don't completely fail if we don't have pngcrush
     if os.system("pngcrush -q " + anim_name + "_packed_tmp.png " + anim_name + "_packed.png") == 0:
         os.system("rm " + anim_name + "_packed_tmp.png")
@@ -261,6 +263,7 @@ def generate_animation(anim_name):
     f.write(("%s_timeline = " % anim_name).encode('utf-8'))
     f.write(json.dumps(to_native(timeline)).encode('utf-8'))
     f.close()
+    copyfile('example_anim.js', '/anim_encoder_result/example_anim.js')
 
 
 if __name__ == '__main__':
